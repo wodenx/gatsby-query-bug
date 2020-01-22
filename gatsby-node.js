@@ -108,33 +108,6 @@ const readTemplateFile = indexPath => {
   return cachedTemplates[indexPath];
 };
 
-const findSubPageTemplateTemplate = (indexPath, basePath) => {
-  const templates = readTemplateFile(indexPath);
-  if (templates.subpage_template) {
-    return templates.subpage_template;
-  }
-  const parentPath = pathUtil.dirname(pathUtil.dirname(indexPath));
-  if (parentPath <= basePath) {
-    return '_default';
-  }
-  return findSubPageTemplateTemplate(`${parentPath}/index.json`, basePath);
-};
-
-const findTemplate = (indexPath, basePath, isFirst = true) => {
-  const templates = readTemplateFile(indexPath);
-  if (isFirst && templates.template) {
-    return templates.template;
-  }
-  if (!isFirst && templates.subpage_template) {
-    return templates.subpage_template;
-  }
-  const parentPath = pathUtil.dirname(pathUtil.dirname(indexPath));
-  if (parentPath <= basePath) {
-    return '_default';
-  }
-  return findTemplate(`${parentPath}/index.json`, basePath, false);
-};
-
 exports.onCreateNode = ({ node, getNode, actions }) => {
   const { createNodeField } = actions;
   if (node.internal.type === 'RawCode') {
@@ -170,39 +143,17 @@ const createPagesFromFS = async ({ actions, graphql, getNode }) => {
     return;
   }
   result.data.allDirectory.edges.forEach(({ node }) => {
-    const templateBasePath = ['.', 'src', 'templates'];
     const dataBasePath = ['.', 'src', 'data'];
     const slug = createSlug({ node, getNode });
-    const pageData = {
-      path: slug,
-      component: pathUtil.resolve(...templateBasePath, '_default.jsx'),
-      context: {
-        slug,
-      },
-    };
     try {
       const indexPath = findComponentPath(...dataBasePath, node.relativePath);
-      if (indexPath === null) {
-        logger.log('Skip folder ', slug, pageData.path, ' index file not found.');
-        return;
-      }
-
-      const basePath = pathUtil.resolve(...dataBasePath);
-      // Handle JSON.
-      if (indexPath.endsWith('.json')) {
-        const template = findTemplate(indexPath, basePath);
-        pageData.component = pathUtil.resolve(
-          ...templateBasePath,
-          `${template}.jsx`,
-        );
-        pageData.context.template = template;
-      } else {
-        // Normal way.
-        pageData.component = indexPath;
-      }
-
-      pageData.context.subPageTemplate = findSubPageTemplateTemplate(indexPath, basePath);
-
+      const pageData = {
+        path: slug,
+        component: indexPath,
+        context: {
+          slug,
+        },
+      };
       logger.log('Creating page ', slug, pageData.path, pageData.component);
       createPage(pageData);
     } catch (exception) {
