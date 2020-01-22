@@ -2,8 +2,10 @@
 
 STR.
 1. npm i
+2. npm run bug-all
+-- or --
 2. npm run start
-3. bash update.sh
+3. (in separate shell) npm run bug
 
 ER.
 Normal queries are executed on each update
