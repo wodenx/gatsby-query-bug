@@ -117,7 +117,7 @@ const createPagesFromFS = async ({ actions, graphql, getNode }) => {
   }
   result.data.allDirectory.edges.forEach(({ node }) => {
     const dataBasePath = ['.', 'src', 'data'];
-    const slug = createSlug({ node, getNode });
+    const slug = '/foo/'; // createSlug({ node, getNode });
     try {
       const indexPath = findComponentPath(...dataBasePath, node.relativePath);
       const pageData = {
