@@ -24,9 +24,6 @@ const fs = require('fs');
 
 const { createFilePath } = require('gatsby-source-filesystem');
 
-const logger = console;
-
-
 const findFilesystemNode = ({ node, getNode }) => {
   // Find the filesystem node.
   const types = ['File', 'Directory'];
@@ -43,7 +40,7 @@ const findFilesystemNode = ({ node, getNode }) => {
     whileCount += 1;
 
     if (whileCount > 100) {
-      logger.warn('Cannot find a directory node for ', fsNode);
+      console.warn('Cannot find a directory node for ', fsNode);
     }
   }
   return fsNode;
@@ -84,30 +81,6 @@ const findComponentPath = (...pathSegments) => {
   return componentPath || null;
 };
 
-const cachedTemplates = [];
-
-const readTemplateFile = indexPath => {
-  if (cachedTemplates.includes(indexPath)) {
-    return cachedTemplates[indexPath];
-  }
-  if (!fs.existsSync(indexPath)) {
-    cachedTemplates[indexPath] = false;
-    return cachedTemplates[indexPath];
-  }
-  const contents = fs.readFileSync(indexPath);
-  try {
-    const parsedContent = JSON.parse(contents);
-    cachedTemplates[indexPath] = {
-      template: parsedContent['#template'],
-      subpage_template: parsedContent['#subpage_template'],
-      path: parsedContent.path,
-    };
-  } catch (exception) {
-    cachedTemplates[indexPath] = false;
-  }
-  return cachedTemplates[indexPath];
-};
-
 exports.onCreateNode = ({ node, getNode, actions }) => {
   const { createNodeField } = actions;
   if (node.internal.type === 'RawCode') {
@@ -139,7 +112,7 @@ const createPagesFromFS = async ({ actions, graphql, getNode }) => {
     }
   `);
   if (result.errors) {
-    logger.log(result.errors);
+    console.log(result.errors);
     return;
   }
   result.data.allDirectory.edges.forEach(({ node }) => {
@@ -154,10 +127,10 @@ const createPagesFromFS = async ({ actions, graphql, getNode }) => {
           slug,
         },
       };
-      logger.log('Creating page ', slug, pageData.path, pageData.component);
+      console.log('Creating page ', slug, pageData.path, pageData.component);
       createPage(pageData);
     } catch (exception) {
-      logger.warn(`Error trying to create ${pageData.path}`, exception);
+      console.warn(`Error trying to create ${pageData.path}`, exception);
     }
   });
 };
