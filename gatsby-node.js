@@ -26,27 +26,6 @@ const { createFilePath } = require('gatsby-source-filesystem');
 
 const logger = console;
 
-// exports.onCreateBabelConfig = ({ actions: { setBabelPlugin } }) => {
-// exports.onCreateBabelConfig = args => {
-//   const {
-//     actions: { setBabelPlugin },
-//   } = args;
-//   setBabelPlugin({
-//     name: '@babel/plugin-proposal-decorators',
-//     options: { legacy: true },
-//   });
-//   setBabelPlugin({
-//     name: '@babel/plugin-proposal-class-properties',
-//     options: { loose: true },
-//   });
-//   setBabelPlugin({
-//     name: 'babel-plugin-tailwind-components',
-//     options: {
-//       config: './tailwind.config.js',
-//       format: 'auto',
-//     },
-//   });
-// };
 
 const findFilesystemNode = ({ node, getNode }) => {
   // Find the filesystem node.
@@ -232,55 +211,6 @@ const createPagesFromFS = async ({ actions, graphql, getNode }) => {
   });
 };
 
-const createPreviewPagesForTemplates = async ({ actions, graphql, getNode }) => {
-  const { createPage } = actions;
-
-  const result = await graphql(`
-    {
-      allFile(filter: { sourceInstanceName: { eq: "templates" } }) {
-        edges {
-          node {
-            absolutePath
-            relativePath
-            relativeDirectory
-            internal {
-              type
-            }
-          }
-        }
-      }
-    }
-  `);
-
-  if (result.errors) {
-    logger.log(result.errors);
-    return;
-  }
-
-  result.data.allFile.edges.forEach(({ node }) => {
-    const templatesPrefix = '___templates';
-    const templateBasePath = ['.', 'src', 'templates'];
-    const pagePath = createFilePath({
-      node,
-      getNode,
-      basePath: pathUtil.join(...templateBasePath),
-    });
-    const slug = `/${templatesPrefix}${pagePath}`;
-    const pageData = {
-      path: slug,
-      component: pathUtil.resolve(...templateBasePath, node.relativePath),
-      context: {
-        slug,
-      },
-    };
-    logger.log('Creating a preview template page ', slug, pageData.path, pageData.component);
-    createPage(pageData);
-  });
-};
-
 exports.createPages = async ({ actions, graphql, getNode }) => {
   await createPagesFromFS({ actions, graphql, getNode });
-  if (process.env.NODE_ENV === 'development') {
-    await createPreviewPagesForTemplates({ actions, graphql, getNode });
-  }
 };

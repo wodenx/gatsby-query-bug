@@ -6,34 +6,20 @@ module.exports = {
     author: `@gatsbyjs`,
   },
   plugins: [
-  {
-    resolve: 'gatsby-transformer-code',
-    options: {
-      name: 'data',
-      extensions: ['json'],
-    },
-  },
-  {
-    resolve: 'gatsby-source-filesystem',
-    options: {
-      name: 'data',
-      path: path.resolve('./src/data/'),
-    },
-  },
-  {
-    resolve: 'gatsby-source-filesystem',
-    options: {
-      name: 'templates',
-      path: path.resolve('./src/templates/'),
-    },
-  },
-    `gatsby-plugin-react-helmet`,
     {
-      resolve: `gatsby-source-filesystem`,
+      resolve: 'gatsby-transformer-code',
       options: {
-        name: `images`,
-        path: `${__dirname}/src/images`,
+        name: 'data',
+        extensions: ['json'],
       },
     },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        name: 'data',
+        path: path.resolve('./src/data/'),
+      },
+    },
+    `gatsby-plugin-react-helmet`,
   ],
 }
